@@ -1,0 +1,32 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const db = require('./db');
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.post('/register', (req, res) => {
+  const { name, email, course, year } = req.body;
+  const sql = 'INSERT INTO students (name, email, course, year) VALUES (?, ?, ?, ?)';
+  db.query(sql, [name, email, course, year], (err) => {
+    if (err) return res.status(500).json({ message: 'Registration failed' });
+    res.json({ message: 'Student registered successfully!' });
+  });
+});
+app.get('/students', (req, res) => {
+  db.query('SELECT * FROM students', (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error fetching students' });
+    res.json(results);
+  });
+});
+app.post('/contact', (req, res) => {
+  const { name, email, message } = req.body;
+  const sql = 'INSERT INTO messages (name, email, message) VALUES (?, ?, ?)';
+  db.query(sql, [name, email, message], (err) => {
+    if (err) return res.status(500).json({ message: 'Message send failed' });
+    res.json({ message: 'Message sent successfully!' });
+  });
+});
+app.listen(3000, () => console.log('Server running on http://localhost:3000'));
